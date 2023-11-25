@@ -1,25 +1,29 @@
-import { createTheme } from '@mui/material/styles';
-import { red } from '@mui/material/colors';
+import { experimental_extendTheme as extendTheme } from '@mui/material/styles'
 
+// #Trello1
 // A custom theme for this app
 //https://mui.com/material-ui/customization/theming/
 //https://mui.com/material-ui/customization/default-theme/
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: '#556cd6',
+
+const theme = extendTheme({
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: {
+          main: '#C4E0E5',
+        },
+      },
+      // (Bootstrap strategy)
     },
-    secondary: {
-      main: '#19857b',
+    dark: {
+      palette: {
+        // primary: {
+        //   main: '#000',
+        // },
+      },
     },
-    error: {
-      main: red.A400,
-    },
-    text: {
-      primary: "#333"
-    }
   },
+  spacing: (factor: number) => `${0.25 * factor}rem`,
 });
 
 export default theme;
