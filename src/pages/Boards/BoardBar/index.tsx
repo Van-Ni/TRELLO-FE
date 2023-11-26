@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import { BAR_HEIGHT } from "../../../utils/dimensions"
+import { BAR_HEIGHT } from "@utils/dimensions"
 
 export const BoardBar = () => {
   return (
