@@ -4,7 +4,7 @@ import { BoardBar } from './BoardBar';
 import { BoardContent } from './BoardContent';
 export const Board = () => {
   return (
-    <Container maxWidth={false} sx={{ backgroundColor: 'primary.main'  }}>
+    <Container maxWidth={false} sx={{ backgroundColor: 'primary.main', p: "0rem !important" }}>
       <AppBar />
       <BoardBar />
       <BoardContent />

@@ -10,8 +10,12 @@ const theme = extendTheme({
     light: {
       palette: {
         primary: {
-          main: '#C4E0E5',
+          main: '#2E3641',
+          light: "#fff",
         },
+        grey: {
+          500: "#ffffff33"
+        }
       },
       // (Bootstrap strategy)
     },
