@@ -23,11 +23,27 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "",
     "paths": {
-      "~/*": ["src/*"],
-      "@components/*": ["src/components/*"],
-      "@pages/*": ["src/pages/*"],
-      "@utils/*": ["src/utils/*"],
-    }
+      "~/*": [
+        "src/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@pages/*": [
+        "src/pages/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ],
+    },
+    // # Trello5: vite-plugin-svgr/client
+    //https://stackoverflow.com/questions/74720726/type-definition-for-vite-plugin-svgr/75818331#75818331
+    "types": [
+      "vite-plugin-svgr/client"
+    ]
   },
   "include": [
     "src"
