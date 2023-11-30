@@ -1,3 +1,15 @@
 .c-pointer{
     cursor: pointer;
 }
+
+/* input element */
+
+.MuiInputBase-root input:focus{
+    outline: none;
+}
+
+.MuiInputBase-root input::placeholder{
+    color: #ffffff;
+}
+
+/* select element  */
