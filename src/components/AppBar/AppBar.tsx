@@ -1,13 +1,12 @@
 import { Badge, Box, Button, InputAdornment, SvgIcon, TextField, Tooltip, Typography } from '@mui/material'
 import { HEADER_HEIGHT } from '@utils/dimensions'
-import { ModeSelect } from '../ModeSelect'
+import { ModeSelect } from '../ModeSelect/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps';
 import { ReactComponent as TrelloLogo } from '@assets/trello.svg';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
 import { Workspace } from './Menus/Workspace';
 import { Recent } from './Menus/Recent';
 import { Starred } from './Menus/Starred';
