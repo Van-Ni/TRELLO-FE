@@ -1,7 +1,21 @@
-import { ListColumns } from "./ListColumns/ListColumns"
+import { FC } from "react";
+import ListColumns from "./ListColumns/ListColumns"
+import { Column } from "~/interface/Board";
+import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 
-export const BoardContent = () => {
+
+interface BoardContentProps {
+  columns: Column[];
+  columnOrderIds: string[]
+}
+const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
+
+  // sort column order
+  const orderedColumns = orderArrayBasedOnAnotherArray(columns, columnOrderIds, '_id');
+
   return (
-    <ListColumns />
+    <ListColumns columns={orderedColumns} />
   )
 }
+
+export default BoardContent;

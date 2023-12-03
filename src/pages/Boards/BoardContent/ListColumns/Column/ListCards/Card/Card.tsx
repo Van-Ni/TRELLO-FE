@@ -8,15 +8,29 @@ import Typography from '@mui/material/Typography';
 import PeopleIcon from '@mui/icons-material/People';
 import MessageIcon from '@mui/icons-material/Message';
 import AttachmentIcon from '@mui/icons-material/Attachment';
-export const Card = () => {
+import { Card } from '~/interface/Board';
+import { FC } from 'react';
+
+
+interface CardProps {
+    card: Card
+}
+const Card: FC<CardProps> = ({ card }) => {
+    const { cover, memberIds, comments, attachments } = card;
+
+    const hasCardActions = (): boolean => {
+        return Array.isArray(memberIds) && memberIds.length > 0
+            || Array.isArray(comments) && comments.length > 0
+            || Array.isArray(attachments) && attachments.length > 0;
+    };
     return (
         <MuiCard sx={{ marginBottom: '8px' }}
         >
-            <CardMedia
+            {cover && <CardMedia
                 sx={{ height: 140 }}
-                image="https://nghenghiep.vieclam24h.vn/wp-content/uploads/2022/08/dev-la-gi-1.jpg"
+                image={cover}
                 title="green iguana"
-            />
+            />}
             <CardContent sx={{
                 padding: '8px 12px 4px',
                 '&:last-child': {
@@ -24,14 +38,16 @@ export const Card = () => {
                 }
             }}>
                 <Typography variant="subtitle1" sx={{ marginBottom: '4px' }} >
-                    NiDev
+                    {card.title}
                 </Typography>
             </CardContent>
-            <CardActions sx={{ padding: '0' }}>
-                <Button size="small" startIcon={<PeopleIcon />} sx={{ color: 'primary.main' }}>10</Button>
-                <Button size="small" startIcon={<MessageIcon />} sx={{ color: 'primary.main' }}>20</Button>
-                <Button size="small" startIcon={<AttachmentIcon />} sx={{ color: 'primary.main' }}>30</Button>
-            </CardActions>
+            {hasCardActions() && <CardActions sx={{ padding: '0' }}>
+                {!!memberIds.length && <Button size="small" startIcon={<PeopleIcon />} sx={{ color: 'primary.main' }}>{memberIds.length}</Button>}
+                {!!comments.length && <Button size="small" startIcon={<MessageIcon />} sx={{ color: 'primary.main' }}>{comments.length}</Button>}
+                {!!attachments.length && <Button size="small" startIcon={<AttachmentIcon />} sx={{ color: 'primary.main' }}>{attachments.length}</Button>}
+            </CardActions>}
         </MuiCard>
     )
 }
+
+export default Card

@@ -1,7 +1,9 @@
 import { Container } from '@mui/material';
-import { AppBar } from '~/components/AppBar/AppBar';
-import { BoardBar } from './BoardBar/BoardBar';
-import { BoardContent } from './BoardContent/BoardContent';
+import { AppBar } from '@components/AppBar/AppBar';
+import BoardBar from './BoardBar/BoardBar';
+import BoardContent from './BoardContent/BoardContent';
+import { mockData } from '~/api/mock-data';
+
 export const Board = () => {
   return (
     <Container maxWidth={false} sx={{
@@ -9,8 +11,11 @@ export const Board = () => {
       p: "0rem !important",
     }}>
       <AppBar />
-      <BoardBar />
-      <BoardContent />
+      <BoardBar
+        title={mockData.board?.title}
+        label={mockData.board?.type}
+      />
+      <BoardContent columns={mockData?.board.columns} columnOrderIds={mockData?.board.columnOrderIds} />
     </Container>
   )
 }

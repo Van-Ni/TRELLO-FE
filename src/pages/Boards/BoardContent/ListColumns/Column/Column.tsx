@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Box, Menu, MenuItem, Tooltip } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
@@ -15,14 +15,20 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT, LIST_WIDTH } from "@utils/dimensions"
-import { ListCards } from './ListCards/ListCards';
+import ListCards from './ListCards/ListCards';
+import { Column } from '~/interface/Board';
 
 const flexCenter = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
 }
-export const Column = () => {
+
+interface ColumnProps {
+    column: Column
+}
+const Column: FC<ColumnProps> = ({ column }) => {
+    const { title, cards, cardOrderIds } = column;
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -51,7 +57,7 @@ export const Column = () => {
                     maxHeight: CARD_TITLE_HEIGHT
                 }}>
                     <Typography variant="h6" sx={{ fontSize: '1rem' }}>
-                        Hello
+                        {title}
                     </Typography>
                     <div>
                         <Tooltip title="More options">
@@ -120,7 +126,7 @@ export const Column = () => {
                     </div>
                 </Box>
                 {/* Box content */}
-                <ListCards />
+                <ListCards cards={cards} cardOrderIds={cardOrderIds}/>
                 {/* Box footer */}
                 <Box sx={{
                     padding: '8px 8px 0',
@@ -143,3 +149,5 @@ export const Column = () => {
         </>
     )
 }
+
+export default Column

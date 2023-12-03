@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { Box, Button, Chip, Tooltip } from "@mui/material"
 import { BAR_HEIGHT } from "@utils/dimensions"
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -8,6 +9,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { capitalizeFirstLetter } from '@utils/formatters';
 const MENU_STYLE = {
   color: 'primary.light',
   backgroundColor: 'transparent',
@@ -17,7 +19,13 @@ const MENU_STYLE = {
     color: 'primary.light',
   }
 }
-export const BoardBar = () => {
+
+interface BoardBarProps {
+  title: string;
+  label: string;
+}
+
+const BoardBar: FC<BoardBarProps> = ({ title, label }) => {
   return (
     <Box px={2} sx={{
       height: BAR_HEIGHT,
@@ -34,11 +42,11 @@ export const BoardBar = () => {
         <Chip
           sx={MENU_STYLE}
           icon={<DashboardIcon />}
-          label='NiDev Board' />
+          label={title} />
         <Chip
           sx={MENU_STYLE}
           icon={<VpnLockIcon />}
-          label='Public/Private Workspace' />
+          label={capitalizeFirstLetter(label)} />
         <Chip
           sx={MENU_STYLE}
           icon={<AddToDriveIcon />}
@@ -59,7 +67,7 @@ export const BoardBar = () => {
       }}>
         <Button variant="outlined" sx={{ border: '1px solid #ffffff29' }} startIcon={<PersonAddIcon />}>
           Invite
-          </Button>
+        </Button>
         <AvatarGroup max={4} sx={{
           '& .css-4mccq1-MuiAvatar-root-MuiAvatarGroup-avatar': {
             width: "24px",
@@ -89,3 +97,5 @@ export const BoardBar = () => {
     </Box>
   )
 }
+
+export default BoardBar;

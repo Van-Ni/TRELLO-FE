@@ -1,8 +1,16 @@
 import { Box } from '@mui/material';
 import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT } from "@utils/dimensions"
-import { Card } from './Card/Card';
+import Card from './Card/Card';
+import { Card as ICard } from '~/interface/Board';
+import { FC } from 'react';
+import { orderArrayBasedOnAnotherArray } from '@utils/sort';
 
-export const ListCards = () => {
+interface ListCardsProps {
+    cards: ICard[];
+    cardOrderIds: string[]
+}
+const ListCards: FC<ListCardsProps> = ({ cards, cardOrderIds }) => {
+    const orderedCards = orderArrayBasedOnAnotherArray(cards, cardOrderIds, '_id');
     return (
         <>
             <Box
@@ -22,9 +30,10 @@ export const ListCards = () => {
                     }
                 }}
             >
-                <Card/>
-                <Card/>
+                {orderedCards.map(card => <Card key={card._id} card={card} />)}
             </Box>
         </>
     )
 }
+
+export default ListCards
