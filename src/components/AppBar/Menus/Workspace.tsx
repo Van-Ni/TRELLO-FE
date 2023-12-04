@@ -9,7 +9,7 @@ import ContentCopy from '@mui/icons-material/ContentCopy';
 import ContentPaste from '@mui/icons-material/ContentPaste';
 import Cloud from '@mui/icons-material/Cloud';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-export const Workspace = () => {
+const Workspace = () => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,3 +78,6 @@ export const Workspace = () => {
         </div>
     )
 }
+
+export default Workspace;
+

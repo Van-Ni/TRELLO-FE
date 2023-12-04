@@ -7,11 +7,7 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import SearchIcon from '@mui/icons-material/Search';
-import { Workspace } from './Menus/Workspace';
-import { Recent } from './Menus/Recent';
-import { Starred } from './Menus/Starred';
-import { Template } from './Menus/Template';
-import { Profile } from './Menus/Profiles';
+import { Profiles, Workspace, Recent, Starred, Template } from './Menus';
 // #Trello5 : https://dev.to/cassidoo/importing-svg-files-as-react-components-with-vite-l3n
 export const AppBar = () => {
     return (
@@ -82,7 +78,7 @@ export const AppBar = () => {
                 <Tooltip title="Information">
                     <HelpOutlineIcon sx={{ color: 'primary.light' }} />
                 </Tooltip>
-                <Profile />
+                <Profiles />
             </Box>
         </Box >
     )

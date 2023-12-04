@@ -11,7 +11,7 @@ import Cloud from '@mui/icons-material/Cloud';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const ITEM_HEIGHT = 48;
-export const Template = () => {
+const Template = () => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -86,3 +86,4 @@ export const Template = () => {
         </div>
     )
 }
+export default Template;
