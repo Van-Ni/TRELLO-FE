@@ -17,17 +17,45 @@ import Typography from '@mui/material/Typography';
 import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT, LIST_WIDTH } from "@utils/dimensions"
 import ListCards from './ListCards/ListCards';
 import { Column } from '~/interface/Board';
+import { useSortable } from '@dnd-kit/sortable';
+import { DraggableAttributes } from '@dnd-kit/core';
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { Transform } from '@dnd-kit/utilities';
+import { CSS } from '@dnd-kit/utilities';
 
 const flexCenter = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
 }
-
+interface Sortable {
+    attributes: DraggableAttributes;
+    listeners: SyntheticListenerMap | undefined;
+    setNodeRef: (node: HTMLElement | null) => void;
+    transform: Transform | null;
+    transition: string | undefined;
+}
 interface ColumnProps {
     column: Column
 }
 const Column: FC<ColumnProps> = ({ column }) => {
+    // #dndkit: useSortable
+    // https://docs.dndkit.com/presets/sortable/usesortable#usage
+    const sortable: Sortable = useSortable({
+        id: column._id,
+        data: { ...column }
+    });
+
+    const dndkitColumnStyle = {
+        // #dndkit: prevent scrolling on mobile devices. 
+        //https://docs.dndkit.com/api-documentation/sensors/pointer#touch-action
+        touchAction: 'none',
+        // #dndkit: stretched when dragged
+        // https://github.com/clauderic/dnd-kit/issues/117 CSS.Transfrom -> CSS.Translate
+        transform: CSS.Translate.toString(sortable.transform),
+        transition: sortable.transition
+    };
+
     const { title, cards, cardOrderIds } = column;
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -41,6 +69,10 @@ const Column: FC<ColumnProps> = ({ column }) => {
         <>
             {/* Box card */}
             <Box
+                style={dndkitColumnStyle}
+                ref={sortable.setNodeRef}
+                {...sortable.attributes}
+                {...sortable.listeners}
                 m={2}
                 sx={{
                     width: LIST_WIDTH,
@@ -126,7 +158,7 @@ const Column: FC<ColumnProps> = ({ column }) => {
                     </div>
                 </Box>
                 {/* Box content */}
-                <ListCards cards={cards} cardOrderIds={cardOrderIds}/>
+                <ListCards cards={cards} cardOrderIds={cardOrderIds} />
                 {/* Box footer */}
                 <Box sx={{
                     padding: '8px 8px 0',
