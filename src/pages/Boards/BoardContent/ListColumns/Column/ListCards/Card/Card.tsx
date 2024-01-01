@@ -10,12 +10,32 @@ import MessageIcon from '@mui/icons-material/Message';
 import AttachmentIcon from '@mui/icons-material/Attachment';
 import { Card } from '~/interface/Board';
 import { FC } from 'react';
-
+import { Sortable } from '~/interface/Sensors';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface CardProps {
     card: Card
 }
 const Card: FC<CardProps> = ({ card }) => {
+
+    // #dndkit: useSortable
+    // https://docs.dndkit.com/presets/sortable/usesortable#usage
+    const sortable: Sortable = useSortable({
+        id: card._id,
+        data: { ...card }
+    });
+
+    const dndkitCardStyle = {
+        // #dndkit: prevent scrolling on mobile devices. 
+        //https://docs.dndkit.com/api-documentation/sensors/pointer#touch-action
+        touchAction: 'none',
+        // #dndkit: stretched when dragged
+        // https://github.com/clauderic/dnd-kit/issues/117 CSS.Transfrom -> CSS.Translate
+        transform: CSS.Translate.toString(sortable.transform),
+        transition: sortable.transition
+    };
+
     const { cover, memberIds, comments, attachments } = card;
 
     const hasCardActions = (): boolean => {
@@ -24,7 +44,12 @@ const Card: FC<CardProps> = ({ card }) => {
             || Array.isArray(attachments) && attachments.length > 0;
     };
     return (
-        <MuiCard sx={{ marginBottom: '8px' }}
+        <MuiCard
+            sx={{ marginBottom: '8px' }}
+            style={dndkitCardStyle}
+            ref={sortable.setNodeRef}
+            {...sortable.attributes}
+            {...sortable.listeners}
         >
             {cover && <CardMedia
                 sx={{ height: 140 }}

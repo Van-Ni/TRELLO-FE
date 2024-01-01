@@ -4,6 +4,7 @@ import Card from './Card/Card';
 import { Card as ICard } from '~/interface/Board';
 import { FC } from 'react';
 import { orderArrayBasedOnAnotherArray } from '@utils/sort';
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 interface ListCardsProps {
     cards: ICard[];
@@ -12,7 +13,7 @@ interface ListCardsProps {
 const ListCards: FC<ListCardsProps> = ({ cards, cardOrderIds }) => {
     const orderedCards = orderArrayBasedOnAnotherArray(cards, cardOrderIds, '_id');
     return (
-        <>
+        <SortableContext items={cards.map(c => c._id)} strategy={verticalListSortingStrategy}>
             <Box
                 sx={{
                     // #Trello : How do I add a margin to a CSS webkit scrollbar?
@@ -32,7 +33,7 @@ const ListCards: FC<ListCardsProps> = ({ cards, cardOrderIds }) => {
             >
                 {orderedCards.map(card => <Card key={card._id} card={card} />)}
             </Box>
-        </>
+        </SortableContext>
     )
 }
 

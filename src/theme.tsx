@@ -91,13 +91,13 @@ const theme = extendTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: ({ theme }) => {
-          // console.log(theme);
+          console.log(theme);
           return {
             color: theme.palette.primary.light,
             fontSize: "14px",
             // #Trello : How to remove the border of the Material UI Select component?
             // https://stackoverflow.com/questions/69860132/how-to-remove-the-border-of-the-material-ui-select-component
-            '.MuiOutlinedInput-notchedOutline': {
+            '& .MuiOutlinedInput-notchedOutline': {
               border: '0'
             },
             '&:hover': {

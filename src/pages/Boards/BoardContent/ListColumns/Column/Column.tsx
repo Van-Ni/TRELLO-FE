@@ -18,23 +18,16 @@ import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT, LIST_WIDTH
 import ListCards from './ListCards/ListCards';
 import { Column } from '~/interface/Board';
 import { useSortable } from '@dnd-kit/sortable';
-import { DraggableAttributes } from '@dnd-kit/core';
-import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
-import { Transform } from '@dnd-kit/utilities';
+
 import { CSS } from '@dnd-kit/utilities';
+import { Sortable } from '~/interface/Sensors';
 
 const flexCenter = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
 }
-interface Sortable {
-    attributes: DraggableAttributes;
-    listeners: SyntheticListenerMap | undefined;
-    setNodeRef: (node: HTMLElement | null) => void;
-    transform: Transform | null;
-    transition: string | undefined;
-}
+
 interface ColumnProps {
     column: Column
 }
@@ -46,14 +39,17 @@ const Column: FC<ColumnProps> = ({ column }) => {
         data: { ...column }
     });
 
+    // console.log("sortable", sortable);
+
     const dndkitColumnStyle = {
-        // #dndkit: prevent scrolling on mobile devices. 
+        // #dndkit: prevent scrolling on mobile devices. ( ISSUE: can't scroll )
         //https://docs.dndkit.com/api-documentation/sensors/pointer#touch-action
         touchAction: 'none',
         // #dndkit: stretched when dragged
         // https://github.com/clauderic/dnd-kit/issues/117 CSS.Transfrom -> CSS.Translate
         transform: CSS.Translate.toString(sortable.transform),
-        transition: sortable.transition
+        transition: sortable.transition,
+        opacity: sortable.isDragging ? 0.5 : undefined,
     };
 
     const { title, cards, cardOrderIds } = column;
@@ -66,12 +62,17 @@ const Column: FC<ColumnProps> = ({ column }) => {
         setAnchorEl(null);
     };
     return (
-        <>
+        // #dndkit : lỗi chiều cao -> không thể kéo từ trái sang
+        // fix: wrap div
+        <div
+            style={{ ...dndkitColumnStyle, height: '100%' }}
+            ref={sortable.setNodeRef}
+            {...sortable.attributes}
+
+        >
             {/* Box card */}
             <Box
-                style={dndkitColumnStyle}
-                ref={sortable.setNodeRef}
-                {...sortable.attributes}
+                // #dndkit: lắng nghe sự kiện trên Box
                 {...sortable.listeners}
                 m={2}
                 sx={{
@@ -105,8 +106,8 @@ const Column: FC<ColumnProps> = ({ column }) => {
                                     minHeight: '20px',
                                 }}
                             >
-                                <ExpandMoreIcon
-                                /></Button>
+                                <ExpandMoreIcon />
+                            </Button>
                         </Tooltip>
                         <Menu
                             id="basic-menu-card"
@@ -178,7 +179,7 @@ const Column: FC<ColumnProps> = ({ column }) => {
                     </Tooltip>
                 </Box>
             </Box>
-        </>
+        </div>
     )
 }
 
