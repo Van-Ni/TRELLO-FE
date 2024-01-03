@@ -38,6 +38,8 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
   const [activeDragItemType, setActiveDragItemType] = useState<string>();
   //  data to render overlay 
   const [activeDragItemData, setActiveDragItemData] = useState<IColumn | ICard>();
+  //  set state when dragging card -> event DragStart
+  const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] = useState<IColumn>();
 
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
@@ -78,43 +80,40 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
 
 
   //==== function handles ==== //
-  const handleDragEnd = (event: DragEndEvent) => {
 
-    // Tạm thời chưa làm gì
-    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) return;
-
-    const { active, over } = event;
-    // console.log("end event", event);
-
-    if (active.id !== over?.id) {
-      setOrderedColumns((items: Column[]) => {
-        const oldIndex: number = items.findIndex((item) => item._id === active?.id);
-        const newIndex: number = items.findIndex((item) => item._id === over?.id);
-        console.log("oldIndex", oldIndex, "newIndex", newIndex);
-        // #dndkit: dnd-kit/packages/sortable/src/utilities
-        return arrayMove(items, oldIndex, newIndex);
-      });
-
-      // when drop remove state to make drag overlay
-      setActiveDragItemId("");
-      setActiveDragItemType("");
-      setActiveDragItemData(undefined)
-    }
-  }
-
+  // # ORDER 1
   const handleDragStart = (event: DragStartEvent) => {
-    const { data: { current }, id } = event.active;
-    // console.log("start event: ", event);
-    setActiveDragItemId(id);
-    setActiveDragItemType(current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
-    setActiveDragItemData(current as IColumn | ICard)
-  }
+    const { data, id } = event.active;
+    const current = data.current;
 
+    console.log(" ### 🏝🏝🏝 start event ### ", event);
+    setActiveDragItemId(id);
+
+    if (current) {
+      // dragging card
+      if (current.columnId) {
+        // set state CARD
+        setActiveDragItemType(ACTIVE_DRAG_ITEM_TYPE.CARD);
+        setActiveDragItemData(current as ICard);
+        // set old column when dragging card 
+        const oldColumn = findColumnByCardId(orderedColumns, id as string);
+        setOldColumnWhenDraggingCard(oldColumn);
+      }
+      // dragging column
+      else {
+        // set state COLUMN 
+        setActiveDragItemType(ACTIVE_DRAG_ITEM_TYPE.COLUMN);
+        setActiveDragItemData(current as IColumn);
+      }
+    }
+  };
+
+  // # ORDER 2
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     // fix case: when drag out container
     if (!active || !over) return;
-    console.log("over event: ", event);
+    console.log(" ### ☀☀☀ over event ### ", event);
 
     const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
     const { id: overCardId } = over;
@@ -144,14 +143,14 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
         const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
         const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
 
-        // old column
+        // update old column
         if (nextActiveColumn) {
           nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
           nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
         }
-        // new column
+        // update new column
         if (nextOverColumn) {
-          console.log("newCardIndex",newCardIndex);//
+          console.log("newCardIndex", newCardIndex);
           // remove card if it exists
           nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId);
           nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData as ICard);
@@ -162,8 +161,82 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       })
     }
   }
+
+  // # ORDER 3
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!active || !over) return;
+    console.log(" ### 🚥🚥🚥 end event ###", event);
+    // # Drop column
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      if (active.id !== over?.id) {
+        console.log("setOrderedColumns");
+        setOrderedColumns((items: Column[]) => {
+          const oldIndex: number = items.findIndex((item) => item._id === active?.id);
+          const newIndex: number = items.findIndex((item) => item._id === over?.id);
+          console.log("oldIndex", oldIndex, "newIndex", newIndex);
+          // #dndkit: dnd-kit/packages/sortable/src/utilities
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    }
+    // # Drop card
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
+      const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
+      const { id: overCardId } = over;
+
+      const activeColumn = findColumnByCardId(orderedColumns, activeDraggingCardId as string);
+      const overColumn = findColumnByCardId(orderedColumns, overCardId as string);
+
+      if (!activeColumn || !overColumn) return;
+
+      /**
+       * oldColumnWhenDraggingCard: vì lúc dragOver nó đã set state 1 lần
+       * nên cần set state khi drag start để lấy đúng active column
+       */
+      // another column
+      if (oldColumnWhenDraggingCard?._id !== overColumn._id) {
+        console.log("another column");
+
+
+      }
+      // same column
+      else {
+        console.log("same column");
+        setOrderedColumns((items: Column[]) => {
+          const oldIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === activeDraggingCardId);
+          const newIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === overCardId);
+          // console.log("oldIndex", oldIndex, "newIndex", newIndex);
+          //#dndkit: dnd-kit/packages/sortable/src/utilities
+          const orderedCard: ICard[] = arrayMove(oldColumnWhenDraggingCard?.cards, oldIndex, newIndex);
+          // shallow copy preColumns and re setState
+          const nextColumns: IColumn[] = cloneDeep(orderedColumns);
+          const targetColumn = nextColumns.find(column => column._id === overColumn._id);
+          if (targetColumn) {
+            targetColumn.cards = orderedCard;
+            targetColumn.cardOrderIds = targetColumn.cards.map(card => card._id);
+          }
+
+          console.log("targetColumn", targetColumn);
+
+
+          return nextColumns;
+        });
+
+      }
+    };
+
+    // when drag end remove state to make drag overlay
+    setActiveDragItemId("")
+    setActiveDragItemType("")
+    setActiveDragItemData(undefined)
+    setOldColumnWhenDraggingCard(undefined)
+  }
+
+
   console.log("orderedColumns", orderedColumns);
-  
+
   return (
     /** #dndkit : Context provider
      * https://docs.dndkit.com/introduction/getting-started#context-provider
@@ -177,7 +250,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
        *  When should I use the closest corners algorithm instead of closest center?
        */
       collisionDetection={closestCorners}
-      >
+    >
       <ListColumns columns={orderedColumns} />
 
       {/* #dndkit: Drag Overlay */}
