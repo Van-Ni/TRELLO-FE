@@ -5,7 +5,7 @@ import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
   DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects,
-  useSensor, useSensors
+  useSensor, useSensors, closestCorners
 } from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
@@ -172,7 +172,12 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
-      sensors={sensors}>
+      sensors={sensors}
+      /** #dndkit: Collision detection algorithms
+       *  When should I use the closest corners algorithm instead of closest center?
+       */
+      collisionDetection={closestCorners}
+      >
       <ListColumns columns={orderedColumns} />
 
       {/* #dndkit: Drag Overlay */}
