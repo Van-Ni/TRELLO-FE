@@ -33,7 +33,9 @@ const Card: FC<CardProps> = ({ card }) => {
         // #dndkit: stretched when dragged
         // https://github.com/clauderic/dnd-kit/issues/117 CSS.Transfrom -> CSS.Translate
         transform: CSS.Translate.toString(sortable.transform),
-        transition: sortable.transition
+        transition: sortable.transition,
+        opacity: sortable.isDragging ? 0.5 : undefined,
+        border: sortable.isDragging ? "1px solid #00fff1" : ""
     };
 
     const { cover, memberIds, comments, attachments } = card;

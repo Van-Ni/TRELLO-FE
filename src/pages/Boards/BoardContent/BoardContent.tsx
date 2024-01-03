@@ -2,11 +2,18 @@ import { FC, useEffect, useState } from "react";
 import ListColumns from "./ListColumns/ListColumns"
 import { Card as ICard, Column as IColumn } from "~/interface/Board";
 import { orderArrayBasedOnAnotherArray } from "@utils/sort";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
+  DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects,
+  useSensor, useSensors
+} from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
 import Column from "./ListColumns/Column/Column";
-
+import { findColumnByCardId } from "@utils/search";
+//#package : lodash
+// fix : install @types/lodash
+import { cloneDeep } from "lodash";
 
 interface BoardContentProps {
   columns: Column[];
@@ -72,8 +79,12 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
 
   //==== function handles ==== //
   const handleDragEnd = (event: DragEndEvent) => {
+
+    // Tạm thời chưa làm gì
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) return;
+
     const { active, over } = event;
-    console.log("end event", event);
+    // console.log("end event", event);
 
     if (active.id !== over?.id) {
       setOrderedColumns((items: Column[]) => {
@@ -92,15 +103,67 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    const { data, id } = event.active;
-    console.log("start event: ", event);
+    const { data: { current }, id } = event.active;
+    // console.log("start event: ", event);
     setActiveDragItemId(id);
-    setActiveDragItemType(data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
-    setActiveDragItemData(data?.current as IColumn | ICard)
+    setActiveDragItemType(current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
+    setActiveDragItemData(current as IColumn | ICard)
   }
 
-  console.log(activeDragItemData);
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    // fix case: when drag out container
+    if (!active || !over) return;
+    console.log("over event: ", event);
 
+    const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
+    const { id: overCardId } = over;
+
+    const activeColumn = findColumnByCardId(orderedColumns, activeDraggingCardId as string);
+    const overColumn = findColumnByCardId(orderedColumns, overCardId as string);
+
+    if (!activeColumn || !overColumn) return;
+
+    if (activeColumn._id !== overColumn._id) {
+      setOrderedColumns(preColumns => {
+        const overCardIndex = overColumn?.cards.findIndex(c => c?._id === overCardId.toString());
+
+        //logic tính toán "cardIndex mới" (trên hoặc dưới của overCard)
+        let newCardIndex: number;
+        const isBelowOverItem =
+          active.rect.current.translated &&
+          active.rect.current.translated.top >
+          over.rect.top + over.rect.height;
+        const modifier = isBelowOverItem ? 1 : 0;
+
+        newCardIndex =
+          overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards.length + 1;
+
+        // shallow copy preColumns and re setState
+        const nextColumns: IColumn[] = cloneDeep(preColumns);
+        const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
+        const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
+
+        // old column
+        if (nextActiveColumn) {
+          nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
+          nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
+        }
+        // new column
+        if (nextOverColumn) {
+          console.log("newCardIndex",newCardIndex);//
+          // remove card if it exists
+          nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId);
+          nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData as ICard);
+          nextOverColumn.cardOrderIds = nextOverColumn.cards.map(c => c._id);
+        }
+        // set state
+        return nextColumns;
+      })
+    }
+  }
+  console.log("orderedColumns", orderedColumns);
+  
   return (
     /** #dndkit : Context provider
      * https://docs.dndkit.com/introduction/getting-started#context-provider
@@ -108,6 +171,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
     <DndContext
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       sensors={sensors}>
       <ListColumns columns={orderedColumns} />
 
