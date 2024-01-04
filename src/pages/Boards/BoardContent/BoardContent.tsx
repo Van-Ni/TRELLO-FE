@@ -5,7 +5,7 @@ import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
   DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects,
-  useSensor, useSensors, closestCorners
+  useSensor, useSensors, closestCorners, Active, Over, DataRef
 } from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
@@ -113,7 +113,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
     const { active, over } = event;
     // fix case: when drag out container
     if (!active || !over) return;
-    console.log(" ### ☀☀☀ over event ### ", event);
+    console.log(" ### 🧠🧠🧠 over event ### ", event);
 
     const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
     const { id: overCardId } = over;
@@ -123,42 +123,21 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
 
     if (!activeColumn || !overColumn) return;
 
+
     if (activeColumn._id !== overColumn._id) {
-      setOrderedColumns(preColumns => {
-        const overCardIndex = overColumn?.cards.findIndex(c => c?._id === overCardId.toString());
-
-        //logic tính toán "cardIndex mới" (trên hoặc dưới của overCard)
-        let newCardIndex: number;
-        const isBelowOverItem =
-          active.rect.current.translated &&
-          active.rect.current.translated.top >
-          over.rect.top + over.rect.height;
-        const modifier = isBelowOverItem ? 1 : 0;
-
-        newCardIndex =
-          overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards.length + 1;
-
-        // shallow copy preColumns and re setState
-        const nextColumns: IColumn[] = cloneDeep(preColumns);
-        const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
-        const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
-
-        // update old column
-        if (nextActiveColumn) {
-          nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
-          nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
-        }
-        // update new column
-        if (nextOverColumn) {
-          console.log("newCardIndex", newCardIndex);
-          // remove card if it exists
-          nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId);
-          nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData as ICard);
-          nextOverColumn.cardOrderIds = nextOverColumn.cards.map(c => c._id);
-        }
-        // set state
-        return nextColumns;
-      })
+      /**
+       * TODO: dùng chung function moveCardBetweenDifferentColumns
+       *  có bug
+       */
+      moveCardBetweenDifferentColumns(
+        activeColumn,
+        overColumn,
+        overCardId.toString(),
+        active,
+        over,
+        activeDraggingCardId,
+        activeDraggingCardData as ICard
+      )
     }
   }
 
@@ -168,6 +147,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
 
     if (!active || !over) return;
     console.log(" ### 🚥🚥🚥 end event ###", event);
+
     // # Drop column
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
       if (active.id !== over?.id) {
@@ -198,13 +178,20 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       // another column
       if (oldColumnWhenDraggingCard?._id !== overColumn._id) {
         console.log("another column");
-
-
+        moveCardBetweenDifferentColumns(
+          oldColumnWhenDraggingCard,
+          overColumn,
+          overCardId.toString(),
+          active,
+          over,
+          activeDraggingCardId,
+          activeDraggingCardData as ICard
+        )
       }
       // same column
       else {
         console.log("same column");
-        setOrderedColumns((items: Column[]) => {
+        setOrderedColumns(() => {
           const oldIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === activeDraggingCardId);
           const newIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === overCardId);
           // console.log("oldIndex", oldIndex, "newIndex", newIndex);
@@ -217,10 +204,6 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
             targetColumn.cards = orderedCard;
             targetColumn.cardOrderIds = targetColumn.cards.map(card => card._id);
           }
-
-          console.log("targetColumn", targetColumn);
-
-
           return nextColumns;
         });
 
@@ -235,6 +218,58 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
   }
 
 
+  function moveCardBetweenDifferentColumns(
+    activeColumns: IColumn | undefined,
+    overColumn: IColumn,
+    overCardId: string,
+    active: Active,
+    over: Over,
+    activeDraggingCardId: string | number,
+    activeDraggingCardData: ICard
+  ) {
+    setOrderedColumns(preColumns => {
+      const overCardIndex = overColumn?.cards.findIndex(c => c?._id === overCardId.toString());
+
+      //logic tính toán "cardIndex mới" (trên hoặc dưới của overCard)
+      let newCardIndex: number;
+      const isBelowOverItem =
+        active.rect.current.translated &&
+        active.rect.current.translated.top >
+        over.rect.top + over.rect.height;
+      const modifier = isBelowOverItem ? 1 : 0;
+
+      newCardIndex =
+        overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards.length + 1;
+
+      // shallow copy preColumns and re setState
+      const nextColumns: IColumn[] = cloneDeep(preColumns);
+      const nextActiveColumn = nextColumns.find(column => column._id === activeColumns?._id)
+      const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
+
+      console.log("nextActiveColumn", nextActiveColumn);
+      console.log("nextOverColumn", nextOverColumn);
+      // // update old column
+      if (nextActiveColumn) {
+        nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
+        nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
+      }
+      // update new column
+      if (nextOverColumn) {
+        // remove card if it exists
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId);
+        // update new column for card
+        const reColumnId_activeDraggingCardData = {
+          ...activeDraggingCardData,
+          columnId: nextOverColumn._id
+        }
+        // console.log("reColumnId_activeDraggingCardData", reColumnId_activeDraggingCardData);
+        nextOverColumn.cards.splice(newCardIndex, 0, reColumnId_activeDraggingCardData as ICard);
+        nextOverColumn.cardOrderIds = nextOverColumn.cards.map(c => c._id);
+      }
+      // set state
+      return nextColumns;
+    })
+  }
   console.log("orderedColumns", orderedColumns);
 
   return (
