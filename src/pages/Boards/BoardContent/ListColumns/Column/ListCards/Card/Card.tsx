@@ -47,7 +47,13 @@ const Card: FC<CardProps> = ({ card }) => {
     };
     return (
         <MuiCard
-            sx={{ marginBottom: '8px' }}
+            sx={{
+                marginBottom: '8px',
+                boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
+                visibility: card?.FE_Placeholder ? 'hidden' : 'unset',
+                height: card?.FE_Placeholder ? 0 : 'auto',
+                // pointerEvents: card?.FE_Placeholder ? 'none' : 'unset',
+            }}
             style={dndkitCardStyle}
             ref={sortable.setNodeRef}
             {...sortable.attributes}

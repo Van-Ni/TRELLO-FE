@@ -21,8 +21,8 @@ const MENU_STYLE = {
 }
 
 interface BoardBarProps {
-  title: string;
-  label: string;
+  title?: string;
+  label?: string;
 }
 
 const BoardBar: FC<BoardBarProps> = ({ title, label }) => {

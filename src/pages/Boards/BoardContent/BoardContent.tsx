@@ -1,11 +1,11 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import ListColumns from "./ListColumns/ListColumns"
 import { Card as ICard, Column as IColumn } from "~/interface/Board";
 import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
   DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects,
-  useSensor, useSensors, closestCorners, Active, Over, DataRef
+  useSensor, useSensors, closestCorners, Active, Over, DataRef, pointerWithin, closestCenter, CollisionDetection, rectIntersection
 } from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
@@ -13,7 +13,8 @@ import Column from "./ListColumns/Column/Column";
 import { findColumnByCardId } from "@utils/search";
 //#package : lodash
 // fix : install @types/lodash
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
+import { genertateCardPlaceholder } from "@utils/formatters";
 
 interface BoardContentProps {
   columns: Column[];
@@ -123,12 +124,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
 
     if (!activeColumn || !overColumn) return;
 
-
     if (activeColumn._id !== overColumn._id) {
-      /**
-       * TODO: dùng chung function moveCardBetweenDifferentColumns
-       *  có bug
-       */
       moveCardBetweenDifferentColumns(
         activeColumn,
         overColumn,
@@ -148,7 +144,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
     if (!active || !over) return;
     console.log(" ### 🚥🚥🚥 end event ###", event);
 
-    // # Drop column
+    // # DROP COLUMN 
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
       if (active.id !== over?.id) {
         console.log("setOrderedColumns");
@@ -161,7 +157,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
         });
       }
     }
-    // # Drop card
+    // # DROP CARD 
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
       const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
       const { id: overCardId } = over;
@@ -246,12 +242,19 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       const nextActiveColumn = nextColumns.find(column => column._id === activeColumns?._id)
       const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
 
-      console.log("nextActiveColumn", nextActiveColumn);
-      console.log("nextOverColumn", nextOverColumn);
-      // // update old column
+      // console.log("nextActiveColumn", nextActiveColumn);
+      // console.log("nextOverColumn", nextOverColumn);
+
+      //  update old column
       if (nextActiveColumn) {
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
+        //#dndkit: fix bug drag into empty card in column
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [genertateCardPlaceholder(nextActiveColumn)];
+        }
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
+
+
       }
       // update new column
       if (nextOverColumn) {
@@ -264,6 +267,8 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
         }
         // console.log("reColumnId_activeDraggingCardData", reColumnId_activeDraggingCardData);
         nextOverColumn.cards.splice(newCardIndex, 0, reColumnId_activeDraggingCardData as ICard);
+        //#dndkit: fix bug drag into empty card in column
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_Placeholder);
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(c => c._id);
       }
       // set state
@@ -272,6 +277,18 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
   }
   console.log("orderedColumns", orderedColumns);
 
+  const collisionDetectionStrategy: CollisionDetection = useCallback((args: any) => {
+    // First, let's see if there are any collisions with the pointer
+    const pointerCollisions = pointerWithin(args);
+
+    // Collision detection algorithms return an array of collisions
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    // If there are no collisions with the pointer, return rectangle intersections
+    return rectIntersection(args);
+  }, [activeDragItemType]);
   return (
     /** #dndkit : Context provider
      * https://docs.dndkit.com/introduction/getting-started#context-provider
@@ -285,6 +302,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
        *  When should I use the closest corners algorithm instead of closest center?
        */
       collisionDetection={closestCorners}
+    // collisionDetection={collisionDetectionStrategy}
     >
       <ListColumns columns={orderedColumns} />
 
