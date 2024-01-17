@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { Box, Menu, MenuItem, Tooltip } from '@mui/material';
+import React, { FC, useState } from 'react';
+import { Box, Menu, MenuItem, TextField, Tooltip } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -18,7 +18,7 @@ import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT, LIST_WIDTH
 import ListCards from './ListCards/ListCards';
 import { Column } from '~/interface/Board';
 import { useSortable } from '@dnd-kit/sortable';
-
+import CloseIcon from '@mui/icons-material/Close';
 import { CSS } from '@dnd-kit/utilities';
 import { Sortable } from '~/interface/Sensors';
 
@@ -54,6 +54,10 @@ const Column: FC<ColumnProps> = ({ column }) => {
 
     const { title, cards, cardOrderIds } = column;
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [openNewCardForm, setOpenNewCardForm] = useState<boolean>(false);
+    const [newCardTitle, setNewCardTitle] = useState<string>("");
+
+
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -61,6 +65,14 @@ const Column: FC<ColumnProps> = ({ column }) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const toggleOpenNewCardForm = () => setOpenNewCardForm(prev => !prev);
+    const addNewCard = () => {
+        if (!newCardTitle) {
+            console.log("newCardTitle is empty");
+        }
+        toggleOpenNewCardForm();
+        setNewCardTitle("");
+    }
     return (
         // #dndkit : lỗi chiều cao -> không thể kéo từ trái sang
         // fix: wrap div
@@ -161,23 +173,64 @@ const Column: FC<ColumnProps> = ({ column }) => {
                 {/* Box content */}
                 <ListCards cards={cards} cardOrderIds={cardOrderIds} />
                 {/* Box footer */}
-                <Box sx={{
-                    padding: '8px 8px 0',
-                    ...flexCenter,
-                    color: 'primary.light',
-                    maxHeight: CARD_FOOTER_HEIGHT
-                }}>
-                    <Button variant="text" startIcon={<AddIcon />}>Add a card</Button>
-                    <Tooltip title="Move card">
-                        <Button sx={{
-                            color: 'primary.light',
-                            minWidth: '20px',
-                            minHeight: '20px',
+
+                {!openNewCardForm ? (
+                    <Box sx={{
+                        padding: '8px 8px 0',
+                        ...flexCenter,
+                        color: 'primary.light',
+                        maxHeight: CARD_FOOTER_HEIGHT
+                    }}>
+                        <Button onClick={toggleOpenNewCardForm} variant="text" startIcon={<AddIcon />}>Add a card</Button>
+                        <Tooltip title="Move card">
+                            <Button sx={{
+                                color: 'primary.light',
+                                minWidth: '20px',
+                                minHeight: '20px',
+                            }}>
+                                <DragHandleIcon />
+                            </Button>
+                        </Tooltip>
+                    </Box>
+                ) : (
+                    <Box sx={{
+                        padding: '8px 5px 5px',
+                        color: 'primary.light',
+                        margin: '0 5px',
+                        // height: CARD_FOOTER_HEIGHT   
+                    }}>
+                        <TextField
+                            id="outlined-search" size="small" placeholder="Enter a title for this card..." type="text" autoFocus
+                            value={newCardTitle}
+                            multiline={true}
+                            rows={4}
+                            onChange={(e) => setNewCardTitle(e.target.value)}
+                            sx={{ width: '100%' }}
+                        />
+                        <Box sx={{
+                            mt: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2
                         }}>
-                            <DragHandleIcon />
-                        </Button>
-                    </Tooltip>
-                </Box>
+                            <Button className="btn-add"
+                                variant="contained"
+                                onClick={addNewCard}
+                            >
+                                Add card
+                            </Button>
+                            <CloseIcon
+                                onClick={toggleOpenNewCardForm}
+                                sx={{
+                                    color: "primary.light",
+                                    '&:hover': {
+                                        backgroundColor: "#a6c5e229"
+                                    }
+                                }} />
+                        </Box>
+                    </Box>
+                )}
+
             </Box>
         </div>
     )

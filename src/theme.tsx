@@ -19,6 +19,10 @@ const theme = extendTheme({
           main: "#3A4452", //#3A4452 #0B55BA
           light: "#161D25" //#161D25 #1A80D9
         },
+        success: {
+          main: "#579dff",
+          light: "#70a5efe0"
+        },
         grey: {
           500: "#ffffff33"
         }
@@ -69,6 +73,14 @@ const theme = extendTheme({
           // Some CSS
           '&:hover': {
             backgroundColor: '#a6c5e229',
+          },
+          '&.btn-add': {
+            backgroundColor: theme.palette.success.main,
+            color: theme.palette.primary.main,
+            '&:hover': {
+              backgroundColor: theme.palette.success.light,
+              color: theme.palette.primary.light,
+            }
           },
           color: theme.palette.primary.light,
           textTransform: 'capitalize',
@@ -141,7 +153,16 @@ const theme = extendTheme({
           }
         })
       }
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: ({ }) => ({
+          cursor: "pointer"
+        }),
+
+      }
     }
+
   },
 });
 

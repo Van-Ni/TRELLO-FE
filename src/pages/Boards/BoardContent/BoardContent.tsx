@@ -17,7 +17,7 @@ import { cloneDeep, isEmpty } from "lodash";
 import { genertateCardPlaceholder } from "@utils/formatters";
 
 interface BoardContentProps {
-  columns: Column[];
+  columns: IColumn[];
   columnOrderIds: string[]
 }
 
@@ -27,7 +27,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
   // columns is ordered by order ids
-  const [orderedColumns, setOrderedColumns] = useState<Column[]>([]);
+  const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
 
   /** #dndkit: Drag Overlay
    *  https://docs.dndkit.com/api-documentation/draggable/drag-overlay

@@ -53,6 +53,10 @@ const Card: FC<CardProps> = ({ card }) => {
                 visibility: card?.FE_Placeholder ? 'hidden' : 'unset',
                 height: card?.FE_Placeholder ? 0 : 'auto',
                 // pointerEvents: card?.FE_Placeholder ? 'none' : 'unset',
+                border: "2px solid #fff",
+                "&:hover": {
+                    border: "2px solid #19cc97"
+                }
             }}
             style={dndkitCardStyle}
             ref={sortable.setNodeRef}
