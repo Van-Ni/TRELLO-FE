@@ -4,8 +4,8 @@ import { Card as ICard, Column as IColumn } from "~/interface/Board";
 import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
-  DropAnimation, MouseSensor, TouchSensor, defaultDropAnimationSideEffects,
-  useSensor, useSensors, closestCorners, Active, Over, DataRef, pointerWithin, closestCenter, CollisionDetection, rectIntersection
+  DropAnimation, defaultDropAnimationSideEffects,
+  useSensor, useSensors, closestCorners, Active, Over,  pointerWithin, CollisionDetection, rectIntersection
 } from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
@@ -15,6 +15,7 @@ import { findColumnByCardId } from "@utils/search";
 // fix : install @types/lodash
 import { cloneDeep, isEmpty } from "lodash";
 import { genertateCardPlaceholder } from "@utils/formatters";
+import { MouseSensor, TouchSensor } from "~/customLibrary/DndkitSensors";
 
 interface BoardContentProps {
   columns: IColumn[];
@@ -298,6 +299,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       sensors={sensors}
+      
       /** #dndkit: Collision detection algorithms
        *  When should I use the closest corners algorithm instead of closest center?
        */

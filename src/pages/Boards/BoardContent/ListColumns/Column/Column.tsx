@@ -206,6 +206,7 @@ const Column: FC<ColumnProps> = ({ column }) => {
                             rows={4}
                             onChange={(e) => setNewCardTitle(e.target.value)}
                             sx={{ width: '100%' }}
+                            data-no-dnd="true"
                         />
                         <Box sx={{
                             mt: 2,
