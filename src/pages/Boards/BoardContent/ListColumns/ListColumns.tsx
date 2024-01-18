@@ -6,6 +6,7 @@ import Column from "./Column/Column"
 import { FC, useState } from "react";
 import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-toastify";
 interface ListColumnsProps {
     columns: BoardColumn[]
 }
@@ -17,7 +18,7 @@ const ListColumns: FC<ListColumnsProps> = ({ columns }) => {
 
     const addNewColumn = () => {
         if(!newColumnTitle) {
-            console.log("newColumnTitle is empty");
+            toast.warn('Enter the column title to continue');
         }
         toggleOpenNewColumnForm();
         setNewColumnTitle("");

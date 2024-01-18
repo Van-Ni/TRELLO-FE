@@ -21,6 +21,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import CloseIcon from '@mui/icons-material/Close';
 import { CSS } from '@dnd-kit/utilities';
 import { Sortable } from '~/interface/Sensors';
+import { toast } from 'react-toastify';
 
 const flexCenter = {
     display: 'flex',
@@ -68,7 +69,7 @@ const Column: FC<ColumnProps> = ({ column }) => {
     const toggleOpenNewCardForm = () => setOpenNewCardForm(prev => !prev);
     const addNewCard = () => {
         if (!newCardTitle) {
-            console.log("newCardTitle is empty");
+            toast.warn("Enter the card title to continue");
         }
         toggleOpenNewCardForm();
         setNewCardTitle("");
