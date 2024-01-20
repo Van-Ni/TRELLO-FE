@@ -1,29 +1,34 @@
 import { Box, Button, TextField } from "@mui/material"
 import { BOARD_CONTENT_HEIGHT, LIST_WIDTH } from "@utils/dimensions"
 import AddIcon from '@mui/icons-material/Add';
-import { Column as BoardColumn } from "~/interface/Board";
+import { Column as BoardColumn, CardDataRequest, ColumnDataRequest } from "~/interface/Board";
 import Column from "./Column/Column"
 import { FC, useState } from "react";
 import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "react-toastify";
 interface ListColumnsProps {
-    columns: BoardColumn[]
+    columns: BoardColumn[],
+    createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
+    createNewCard: (cardData: CardDataRequest) => Promise<void>;
+
 }
-const ListColumns: FC<ListColumnsProps> = ({ columns }) => {
+const ListColumns: FC<ListColumnsProps> = ({ columns, createNewColumn, createNewCard }) => {
     const [openNewColumnForm, setOpenNewColumnForm] = useState<boolean>(false);
     const [newColumnTitle, setNewColumnTitle] = useState<string>("");
 
     const toggleOpenNewColumnForm = () => setOpenNewColumnForm(prev => !prev);
 
     const addNewColumn = () => {
-        if(!newColumnTitle) {
+        if (!newColumnTitle) {
             toast.warn('Enter the column title to continue');
+            return;
         }
+        createNewColumn({ boardId: "", title: newColumnTitle });
         toggleOpenNewColumnForm();
         setNewColumnTitle("");
     }
-    
+
     // #dndkit: Animation not working for Array of objects #183
     // https://github.com/clauderic/dnd-kit/issues/183
     return (
@@ -46,7 +51,7 @@ const ListColumns: FC<ListColumnsProps> = ({ columns }) => {
                     },
                 }}>s
                 {/* Box card */}
-                {columns.map((column) => <Column key={column._id} column={column} />)}
+                {columns.map((column) => <Column key={column._id} column={column} createNewCard={createNewCard} />)}
 
                 {/* Box add new column */}
                 {!openNewColumnForm ? (

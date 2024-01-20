@@ -6,7 +6,7 @@ export function capitalizeFirstLetter(str?: string): string {
     return `${firstLetter.toUpperCase()}${rest.join("")}`;
 }
 
-export const genertateCardPlaceholder = (column: Column) : Card => {
+export const generateCardPlaceholder = (column: Column) : Card => {
     return {
         _id: `${column._id}_placeholder`,
         boardId: column.boardId,

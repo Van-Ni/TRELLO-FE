@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import ListColumns from "./ListColumns/ListColumns"
-import { Card as ICard, Column as IColumn } from "~/interface/Board";
+import { CardDataRequest, ColumnDataRequest, Card as ICard, Column as IColumn } from "~/interface/Board";
 import { orderArrayBasedOnAnotherArray } from "@utils/sort";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent,
   DropAnimation, defaultDropAnimationSideEffects,
-  useSensor, useSensors, closestCorners, Active, Over,  pointerWithin, CollisionDetection, rectIntersection
+  useSensor, useSensors, closestCorners, Active, Over, pointerWithin, CollisionDetection, rectIntersection
 } from "@dnd-kit/core";
 import { arrayMove } from "@utils/arrayMove";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
@@ -14,19 +14,21 @@ import { findColumnByCardId } from "@utils/search";
 //#package : lodash
 // fix : install @types/lodash
 import { cloneDeep, isEmpty } from "lodash";
-import { genertateCardPlaceholder } from "@utils/formatters";
+import { generateCardPlaceholder } from "@utils/formatters";
 import { MouseSensor, TouchSensor } from "~/customLibrary/DndkitSensors";
 
 interface BoardContentProps {
   columns: IColumn[];
-  columnOrderIds: string[]
+  columnOrderIds: string[],
+  createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
+  createNewCard: (cardData: CardDataRequest) => Promise<void>;
 }
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: "ACTIVE_DRAG_ITEM_COLUMN" as const,
   CARD: "ACTIVE_DRAG_ITEM_CARD" as const,
 };
-const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
+const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds, createNewColumn, createNewCard }) => {
   // columns is ordered by order ids
   const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
 
@@ -251,7 +253,7 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId);
         //#dndkit: fix bug drag into empty card in column
         if (isEmpty(nextActiveColumn.cards)) {
-          nextActiveColumn.cards = [genertateCardPlaceholder(nextActiveColumn)];
+          nextActiveColumn.cards = [generateCardPlaceholder(nextActiveColumn)];
         }
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
 
@@ -299,14 +301,14 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds }) => {
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       sensors={sensors}
-      
+
       /** #dndkit: Collision detection algorithms
        *  When should I use the closest corners algorithm instead of closest center?
        */
       collisionDetection={closestCorners}
     // collisionDetection={collisionDetectionStrategy}
     >
-      <ListColumns columns={orderedColumns} />
+      <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} />
 
       {/* #dndkit: Drag Overlay */}
       <DragOverlay dropAnimation={dropAnimation}>

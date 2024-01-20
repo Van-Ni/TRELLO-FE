@@ -28,3 +28,12 @@ export interface Column {
     cardOrderIds: string[];
     cards: Card[];
 }
+export interface ColumnDataRequest {
+    boardId: string;
+    title: string;
+}
+export interface CardDataRequest {
+    boardId: string;
+    columnId: string;
+    title: string;
+}

@@ -16,7 +16,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { BOARD_CONTENT_HEIGHT, CARD_FOOTER_HEIGHT, CARD_TITLE_HEIGHT, LIST_WIDTH } from "@utils/dimensions"
 import ListCards from './ListCards/ListCards';
-import { Column } from '~/interface/Board';
+import { CardDataRequest, Column } from '~/interface/Board';
 import { useSortable } from '@dnd-kit/sortable';
 import CloseIcon from '@mui/icons-material/Close';
 import { CSS } from '@dnd-kit/utilities';
@@ -30,9 +30,11 @@ const flexCenter = {
 }
 
 interface ColumnProps {
-    column: Column
+    column: Column,
+    createNewCard?: (cardData: CardDataRequest) => Promise<void>;
+
 }
-const Column: FC<ColumnProps> = ({ column }) => {
+const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
     // #dndkit: useSortable
     // https://docs.dndkit.com/presets/sortable/usesortable#usage
     const sortable: Sortable = useSortable({
@@ -70,7 +72,9 @@ const Column: FC<ColumnProps> = ({ column }) => {
     const addNewCard = () => {
         if (!newCardTitle) {
             toast.warn("Enter the card title to continue");
+            return;
         }
+        createNewCard?.({ title: newCardTitle, columnId: column._id, boardId: "" })
         toggleOpenNewCardForm();
         setNewCardTitle("");
     }
