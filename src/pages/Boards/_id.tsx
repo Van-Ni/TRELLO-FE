@@ -4,8 +4,8 @@ import BoardBar from './BoardBar/BoardBar';
 import BoardContent from './BoardContent/BoardContent';
 import { mockData } from '~/api/mock-data';
 import { useEffect, useState } from 'react';
-import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI } from '~/api';
-import { CardDataRequest, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
+import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, updateBoardDetailsAPI } from '~/api';
+import { CardDataRequest, Column, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
 import { generateCardPlaceholder } from '~/utils/formatters';
 import { isEmpty } from 'lodash';
 
@@ -45,8 +45,6 @@ export const Board = () => {
     createdColumn.data.cards = [placeholderCard];
     createdColumn.data.cardOrderIds = [placeholderCard._id];
 
-    console.log(createdColumn);
-
     // check to set state
     if (createdColumn && createdColumn.status === 201) {
       const updatedColumns = [...board!.columns, createdColumn.data];
@@ -59,7 +57,18 @@ export const Board = () => {
       }));
     }
   }
-
+  // Move column 
+  const moveColumns = async (columnsData: Column[]) => {
+    const columnIds: string[] = columnsData.map(column => column._id);
+    // Update state board
+    setBoardDetails((prevBoard) => ({
+      ...prevBoard!,
+      columnOrderIds: columnIds,
+      columns: columnsData,
+    }));
+    // update column order ids of board
+    await updateBoardDetailsAPI(board?._id as string, { columnOrderIds: columnIds });
+  }
   // Card
   const createNewCard = async (cardData: CardDataRequest) => {
     const createdCard = await createNewCardAPI({ ...cardData, boardId: board?._id as string });
@@ -84,6 +93,7 @@ export const Board = () => {
     }
   }
 
+
   return (
     <Container maxWidth={false} sx={{
       backgroundColor: 'primary.main',
@@ -99,6 +109,7 @@ export const Board = () => {
         columnOrderIds={board?.columnOrderIds || []}
         createNewColumn={createNewColumn}
         createNewCard={createNewCard}
+        moveColumns={moveColumns}
       />
     </Container>
   )

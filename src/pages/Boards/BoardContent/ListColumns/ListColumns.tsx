@@ -49,7 +49,7 @@ const ListColumns: FC<ListColumnsProps> = ({ columns, createNewColumn, createNew
                     '&::-webkit-scrollbar-track': {
                         mx: 2
                     },
-                }}>s
+                }}>
                 {/* Box card */}
                 {columns.map((column) => <Column key={column._id} column={column} createNewCard={createNewCard} />)}
 

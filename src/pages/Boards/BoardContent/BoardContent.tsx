@@ -22,13 +22,17 @@ interface BoardContentProps {
   columnOrderIds: string[],
   createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
   createNewCard: (cardData: CardDataRequest) => Promise<void>;
+  moveColumns: (columnData: IColumn[]) => Promise<void>;
 }
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: "ACTIVE_DRAG_ITEM_COLUMN" as const,
   CARD: "ACTIVE_DRAG_ITEM_CARD" as const,
 };
-const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds, createNewColumn, createNewCard }) => {
+const BoardContent: FC<BoardContentProps> = ({
+  columns, columnOrderIds,
+  createNewColumn, createNewCard, moveColumns
+}) => {
   // columns is ordered by order ids
   const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
 
@@ -147,20 +151,24 @@ const BoardContent: FC<BoardContentProps> = ({ columns, columnOrderIds, createNe
     if (!active || !over) return;
     console.log(" ### 🚥🚥🚥 end event ###", event);
 
-    // # DROP COLUMN 
+    // # DRAG DROP COLUMN 
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
       if (active.id !== over?.id) {
         console.log("setOrderedColumns");
-        setOrderedColumns((items: Column[]) => {
+        setOrderedColumns((items: IColumn[]) => {
           const oldIndex: number = items.findIndex((item) => item._id === active?.id);
           const newIndex: number = items.findIndex((item) => item._id === over?.id);
           console.log("oldIndex", oldIndex, "newIndex", newIndex);
           // #dndkit: dnd-kit/packages/sortable/src/utilities
-          return arrayMove(items, oldIndex, newIndex);
+          const dndOrderedColumn: IColumn[] = arrayMove(items, oldIndex, newIndex);
+          // move columns update DB 
+          moveColumns(dndOrderedColumn);
+          // Set state: update state ở đây để tránh delay hoặc Flickering giao diện lúc kéo thả cần phải chờ gọi API (small trick)
+          return dndOrderedColumn;
         });
       }
     }
-    // # DROP CARD 
+    // # DRAG DROP CARD 
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
       const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
       const { id: overCardId } = over;

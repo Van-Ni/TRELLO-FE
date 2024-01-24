@@ -37,3 +37,6 @@ export interface CardDataRequest {
     columnId: string;
     title: string;
 }
+export interface UpdateBoardRequest {
+    columnOrderIds: string[]; // Order of Columns in the board
+}
