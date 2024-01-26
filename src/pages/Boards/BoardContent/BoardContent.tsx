@@ -22,7 +22,8 @@ interface BoardContentProps {
   columnOrderIds: string[],
   createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
   createNewCard: (cardData: CardDataRequest) => Promise<void>;
-  moveColumns: (columnData: IColumn[]) => Promise<void>;
+  moveColumns: (columnData: IColumn[]) => void;
+  moveCardInTheSameColumn: (cardData: ICard[], cardOrderIds: string[], columnId: string) => void;
 }
 
 const ACTIVE_DRAG_ITEM_TYPE = {
@@ -31,7 +32,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 const BoardContent: FC<BoardContentProps> = ({
   columns, columnOrderIds,
-  createNewColumn, createNewCard, moveColumns
+  createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn
 }) => {
   // columns is ordered by order ids
   const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
@@ -87,7 +88,7 @@ const BoardContent: FC<BoardContentProps> = ({
   }, [columns]);
 
 
-  //==== function handles ==== //
+  //==== FUNCTION HANDLES ==== //
 
   // # ORDER 1
   const handleDragStart = (event: DragStartEvent) => {
@@ -198,22 +199,23 @@ const BoardContent: FC<BoardContentProps> = ({
       // same column
       else {
         console.log("same column");
-        setOrderedColumns(() => {
-          const oldIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === activeDraggingCardId);
-          const newIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === overCardId);
-          // console.log("oldIndex", oldIndex, "newIndex", newIndex);
-          //#dndkit: dnd-kit/packages/sortable/src/utilities
-          const orderedCard: ICard[] = arrayMove(oldColumnWhenDraggingCard?.cards, oldIndex, newIndex);
+        const oldIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === activeDraggingCardId);
+        const newIndex: number = oldColumnWhenDraggingCard?.cards.findIndex((item) => item._id === overCardId);
+        // console.log("oldIndex", oldIndex, "newIndex", newIndex);
+        //#dndkit: dnd-kit/packages/sortable/src/utilities
+        const orderedCard: ICard[] = arrayMove(oldColumnWhenDraggingCard?.cards, oldIndex, newIndex);
+        const orderedCardIds: string[] = orderedCard.map(card => card._id);
+        setOrderedColumns((prevColumns) => {
           // shallow copy preColumns and re setState
-          const nextColumns: IColumn[] = cloneDeep(orderedColumns);
+          const nextColumns: IColumn[] = cloneDeep(prevColumns);
           const targetColumn = nextColumns.find(column => column._id === overColumn._id);
           if (targetColumn) {
             targetColumn.cards = orderedCard;
-            targetColumn.cardOrderIds = targetColumn.cards.map(card => card._id);
+            targetColumn.cardOrderIds = orderedCardIds;
           }
           return nextColumns;
         });
-
+        moveCardInTheSameColumn(orderedCard, orderedCardIds, oldColumnWhenDraggingCard._id);
       }
     };
 
@@ -286,7 +288,6 @@ const BoardContent: FC<BoardContentProps> = ({
       return nextColumns;
     })
   }
-  console.log("orderedColumns", orderedColumns);
 
   const collisionDetectionStrategy: CollisionDetection = useCallback((args: any) => {
     // First, let's see if there are any collisions with the pointer

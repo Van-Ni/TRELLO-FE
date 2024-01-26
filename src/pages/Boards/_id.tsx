@@ -4,8 +4,8 @@ import BoardBar from './BoardBar/BoardBar';
 import BoardContent from './BoardContent/BoardContent';
 import { mockData } from '~/api/mock-data';
 import { useEffect, useState } from 'react';
-import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, updateBoardDetailsAPI } from '~/api';
-import { CardDataRequest, Column, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
+import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/api';
+import { Card, CardDataRequest, Column, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
 import { generateCardPlaceholder } from '~/utils/formatters';
 import { isEmpty } from 'lodash';
 
@@ -13,6 +13,7 @@ export const Board = () => {
 
   const [board, setBoardDetails] = useState<IBoard | null>(null);
 
+  // ========== HOOKS ============ //
   useEffect(() => {
     fetchBoardDetailsAPI("65a536385a0aaa9ce290a65a")
       .then((board: any) => {
@@ -30,12 +31,15 @@ export const Board = () => {
         console.log('updatedColumns', updatedColumns);
 
         setBoardDetails((prevBoard) => ({
+          ...prevBoard,
           ...board.data,
           columns: updatedColumns,
         }))
       })
       .catch(err => console.error(err));
   }, [])
+
+  // ========== FUNCTION HANDLE ============ //
 
   // Column
   const createNewColumn = async (columnData: ColumnDataRequest) => {
@@ -57,8 +61,9 @@ export const Board = () => {
       }));
     }
   }
+
   // Move column 
-  const moveColumns = async (columnsData: Column[]) => {
+  const moveColumns = (columnsData: Column[]) => {
     const columnIds: string[] = columnsData.map(column => column._id);
     // Update state board
     setBoardDetails((prevBoard) => ({
@@ -66,26 +71,28 @@ export const Board = () => {
       columnOrderIds: columnIds,
       columns: columnsData,
     }));
+    // #trello: nếu chỉ cần gọi mà ko cần nhận data gì -> ko cần async
     // update column order ids of board
-    await updateBoardDetailsAPI(board?._id as string, { columnOrderIds: columnIds });
+    updateBoardDetailsAPI(board?._id as string, { columnOrderIds: columnIds });
   }
+
   // Card
   const createNewCard = async (cardData: CardDataRequest) => {
     const createdCard = await createNewCardAPI({ ...cardData, boardId: board?._id as string });
 
     if (createdCard && createdCard.status === 201 && createdCard.data) {
-      const { columnId } = createdCard.data;
+      const { columnId, _id } = createdCard.data;
 
       const updatedColumns = board!.columns.map((column) => {
         if (column._id === columnId) {
           return {
             ...column,
+            cardOrderIds: [...column.cards.map((card) => card._id), _id],
             cards: [...column.cards, createdCard.data],
           };
         }
         return column;
       });
-
       setBoardDetails((prevBoard) => ({
         ...prevBoard!,
         columns: updatedColumns,
@@ -93,6 +100,30 @@ export const Board = () => {
     }
   }
 
+  // Move card
+  const moveCardInTheSameColumn = (cardData: Card[], cardOrderIds: string[], columnId: string) => {
+    // Find the column in the board's columns array
+    const updatedColumns = board!.columns.map((column) => {
+      if (column._id === columnId) {
+        // Update the cardOrderIds and cards array of the column
+        return {
+          ...column,
+          cardOrderIds,
+          cards: cardData,
+        };
+      }
+      return column;
+    });
+
+    // Update the state with the updated columns
+    setBoardDetails((prevBoard) => ({
+      ...prevBoard!,
+      columns: updatedColumns,
+    }));
+
+    // update Columns by columnId 
+    updateColumnDetailsAPI(columnId, { cardOrderIds });
+  };
 
   return (
     <Container maxWidth={false} sx={{
@@ -110,6 +141,7 @@ export const Board = () => {
         createNewColumn={createNewColumn}
         createNewCard={createNewCard}
         moveColumns={moveColumns}
+        moveCardInTheSameColumn={moveCardInTheSameColumn}
       />
     </Container>
   )

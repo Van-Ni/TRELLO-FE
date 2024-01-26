@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Board, ColumnDataRequest, UpdateBoardRequest } from "~/interface/Board";
+import { Board, ColumnDataRequest, UpdateBoardRequest, UpdateColumnRequest } from "~/interface/Board";
 import { API_ROOT } from "~/utils/constants";
 
 // #Trello: Interceptors - clean code
@@ -22,6 +22,12 @@ export const createNewColumnAPI = async (columnData: ColumnDataRequest): Promise
     const response = await axios.post(`${API_ROOT}/v1/columns`, columnData);
     console.log(response.data);
     return response.data;
+};
+
+export const updateColumnDetailsAPI = async (columnId: string, updateData: UpdateColumnRequest): Promise<any> => {
+    const response = await axios.put(`${API_ROOT}/v1/columns/${columnId}`, updateData);
+    const board: Board = response.data;
+    return board;
 };
 
 // Cards

@@ -103,7 +103,6 @@ const theme = extendTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: ({ theme }) => {
-          console.log(theme);
           return {
             color: theme.palette.primary.light,
             fontSize: "14px",
