@@ -24,6 +24,7 @@ interface BoardContentProps {
   createNewCard: (cardData: CardDataRequest) => Promise<void>;
   moveColumns: (columnData: IColumn[]) => void;
   moveCardInTheSameColumn: (cardData: ICard[], cardOrderIds: string[], columnId: string) => void;
+  moveCardToAnotherColumn: (currentCardId: string, prevColumnId: string, nextColumnId: string, dndOrderedColumns: Column[]) => void;
 }
 
 const ACTIVE_DRAG_ITEM_TYPE = {
@@ -32,7 +33,8 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 const BoardContent: FC<BoardContentProps> = ({
   columns, columnOrderIds,
-  createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn
+  createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn,
+  moveCardToAnotherColumn
 }) => {
   // columns is ordered by order ids
   const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
@@ -122,7 +124,7 @@ const BoardContent: FC<BoardContentProps> = ({
     const { active, over } = event;
     // fix case: when drag out container
     if (!active || !over) return;
-    console.log(" ### 🧠🧠🧠 over event ### ", event);
+    // console.log(" ### 🧠🧠🧠 over event ### ", event);
 
     const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active;
     const { id: overCardId } = over;
@@ -140,7 +142,8 @@ const BoardContent: FC<BoardContentProps> = ({
         active,
         over,
         activeDraggingCardId,
-        activeDraggingCardData as ICard
+        activeDraggingCardData as ICard,
+        'handleDragOver'
       )
     }
   }
@@ -193,7 +196,8 @@ const BoardContent: FC<BoardContentProps> = ({
           active,
           over,
           activeDraggingCardId,
-          activeDraggingCardData as ICard
+          activeDraggingCardData as ICard,
+          "handleDragEnd"
         )
       }
       // same column
@@ -234,22 +238,24 @@ const BoardContent: FC<BoardContentProps> = ({
     active: Active,
     over: Over,
     activeDraggingCardId: string | number,
-    activeDraggingCardData: ICard
+    activeDraggingCardData: ICard,
+    triggerFrom: string
   ) {
+    const overCardIndex = overColumn?.cards.findIndex(c => c?._id === overCardId.toString());
+
+    //logic tính toán "cardIndex mới" (trên hoặc dưới của overCard)
+    let newCardIndex: number;
+    const isBelowOverItem =
+      active.rect.current.translated &&
+      active.rect.current.translated.top >
+      over.rect.top + over.rect.height;
+    const modifier = isBelowOverItem ? 1 : 0;
+
+    newCardIndex =
+      overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards.length + 1;
+    // console.log("new card index: " , newCardIndex);
+
     setOrderedColumns(preColumns => {
-      const overCardIndex = overColumn?.cards.findIndex(c => c?._id === overCardId.toString());
-
-      //logic tính toán "cardIndex mới" (trên hoặc dưới của overCard)
-      let newCardIndex: number;
-      const isBelowOverItem =
-        active.rect.current.translated &&
-        active.rect.current.translated.top >
-        over.rect.top + over.rect.height;
-      const modifier = isBelowOverItem ? 1 : 0;
-
-      newCardIndex =
-        overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards.length + 1;
-
       // shallow copy preColumns and re setState
       const nextColumns: IColumn[] = cloneDeep(preColumns);
       const nextActiveColumn = nextColumns.find(column => column._id === activeColumns?._id)
@@ -266,9 +272,8 @@ const BoardContent: FC<BoardContentProps> = ({
           nextActiveColumn.cards = [generateCardPlaceholder(nextActiveColumn)];
         }
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id);
-
-
       }
+
       // update new column
       if (nextOverColumn) {
         // remove card if it exists
@@ -283,6 +288,14 @@ const BoardContent: FC<BoardContentProps> = ({
         //#dndkit: fix bug drag into empty card in column
         nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_Placeholder);
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(c => c._id);
+      }
+      if (triggerFrom === "handleDragEnd") {
+        moveCardToAnotherColumn(
+          activeDraggingCardId as string,
+          activeColumns?._id as string,
+          overColumn?._id,
+          nextColumns
+          );
       }
       // set state
       return nextColumns;

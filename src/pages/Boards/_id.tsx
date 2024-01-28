@@ -4,7 +4,7 @@ import BoardBar from './BoardBar/BoardBar';
 import BoardContent from './BoardContent/BoardContent';
 import { mockData } from '~/api/mock-data';
 import { useEffect, useState } from 'react';
-import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/api';
+import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, moveCardToAnotherColumnAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/api';
 import { Card, CardDataRequest, Column, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
 import { generateCardPlaceholder } from '~/utils/formatters';
 import { isEmpty } from 'lodash';
@@ -71,7 +71,7 @@ export const Board = () => {
       columnOrderIds: columnIds,
       columns: columnsData,
     }));
-    // #trello: nếu chỉ cần gọi mà ko cần nhận data gì -> ko cần async
+    // #trello: If you just need to call without receiving any data -> no need for async
     // update column order ids of board
     updateBoardDetailsAPI(board?._id as string, { columnOrderIds: columnIds });
   }
@@ -84,6 +84,9 @@ export const Board = () => {
       const { columnId, _id } = createdCard.data;
 
       const updatedColumns = board!.columns.map((column) => {
+        /**
+         * TODO: check if is exist FE_Placeholder
+         */
         if (column._id === columnId) {
           return {
             ...column,
@@ -125,6 +128,29 @@ export const Board = () => {
     updateColumnDetailsAPI(columnId, { cardOrderIds });
   };
 
+  const moveCardToAnotherColumn = (
+    currentCardId: string, prevColumnId: string, nextColumnId: string, dndOrderedColumns: Column[]) => {
+    setBoardDetails((prevBoard) => ({
+      ...prevBoard!,
+      columns: dndOrderedColumns,
+    }));
+
+    /**
+     * Update column_id of card
+     * Update card_order_id of both columns
+     */
+    const prevColumn = dndOrderedColumns.find(c => c._id === prevColumnId);
+    const nextColumn = dndOrderedColumns.find(c => c._id === nextColumnId);
+    moveCardToAnotherColumnAPI(
+      {
+        currentCardId,
+        prevColumnId,
+        prevCardOrderIds: prevColumn ? prevColumn.cardOrderIds : [],
+        nextColumnId,
+        nextCardOrderIds: nextColumn ? nextColumn.cardOrderIds : []
+      }
+    );
+  }
   return (
     <Container maxWidth={false} sx={{
       backgroundColor: 'primary.main',
@@ -142,6 +168,7 @@ export const Board = () => {
         createNewCard={createNewCard}
         moveColumns={moveColumns}
         moveCardInTheSameColumn={moveCardInTheSameColumn}
+        moveCardToAnotherColumn={moveCardToAnotherColumn}
       />
     </Container>
   )

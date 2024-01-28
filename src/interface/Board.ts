@@ -41,5 +41,13 @@ export interface UpdateBoardRequest {
     columnOrderIds: string[]; // Order of Columns in the board
 }
 export interface UpdateColumnRequest {
-    cardOrderIds: string[]; 
+    cardOrderIds: string[];
+}
+
+export interface movingCardRequest {
+    currentCardId: string;
+    prevColumnId: string;
+    prevCardOrderIds: string[];
+    nextColumnId: string;
+    nextCardOrderIds: string[];
 }
