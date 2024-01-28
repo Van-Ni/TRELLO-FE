@@ -86,11 +86,12 @@ export const Board = () => {
       const updatedColumns = board!.columns.map((column) => {
         if (column._id === columnId) {
           //check if is exist FE_Placeholder
-          const updatedCards: Card[] = column.cards.filter((card) => !card.FE_Placeholder);
+          if (!isEmpty(column.cards) && column.cards[0].FE_Placeholder)
+            column.cards.shift();
           return {
             ...column,
-            cardOrderIds: [...updatedCards.map((card) => card._id), _id],
-            cards: [...updatedCards, createdCard.data],
+            cardOrderIds: [...column.cards.map((card) => card._id), _id],
+            cards: [...column.cards, createdCard.data],
           };
         }
         return column;
@@ -140,6 +141,11 @@ export const Board = () => {
      */
     const prevColumn = dndOrderedColumns.find(c => c._id === prevColumnId);
     const nextColumn = dndOrderedColumns.find(c => c._id === nextColumnId);
+
+    // Check if cardOrderIds of prevColumn is still exist _placeholder
+    if (!isEmpty(prevColumn) && prevColumn.cardOrderIds[0].includes("_placeholder"))
+      prevColumn.cardOrderIds = [];
+
     moveCardToAnotherColumnAPI(
       {
         currentCardId,
