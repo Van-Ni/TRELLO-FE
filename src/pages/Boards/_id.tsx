@@ -84,14 +84,13 @@ export const Board = () => {
       const { columnId, _id } = createdCard.data;
 
       const updatedColumns = board!.columns.map((column) => {
-        /**
-         * TODO: check if is exist FE_Placeholder
-         */
         if (column._id === columnId) {
+          //check if is exist FE_Placeholder
+          const updatedCards: Card[] = column.cards.filter((card) => !card.FE_Placeholder);
           return {
             ...column,
-            cardOrderIds: [...column.cards.map((card) => card._id), _id],
-            cards: [...column.cards, createdCard.data],
+            cardOrderIds: [...updatedCards.map((card) => card._id), _id],
+            cards: [...updatedCards, createdCard.data],
           };
         }
         return column;
