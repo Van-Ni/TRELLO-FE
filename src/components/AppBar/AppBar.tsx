@@ -60,7 +60,7 @@ export const AppBar = () => {
             }}>
                 <TextField
                     id="outlined-search" size="small" placeholder="Search..." type="search"
-                    sx={{ minWidth: '120px' }}
+                    sx={{ minWidth: '120px', color: "primary.light" }}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">

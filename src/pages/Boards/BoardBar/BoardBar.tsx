@@ -65,7 +65,7 @@ const BoardBar: FC<BoardBarProps> = ({ title, label }) => {
         alignItems: 'center',
         gap: 2,
       }}>
-        <Button variant="outlined" sx={{ border: '1px solid #ffffff29' }} startIcon={<PersonAddIcon />}>
+        <Button variant="outlined" sx={{ border: '1px solid #ffffff29', color: "primary.light" }} startIcon={<PersonAddIcon />}>
           Invite
         </Button>
         <AvatarGroup max={4} sx={{

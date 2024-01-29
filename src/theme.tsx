@@ -82,7 +82,7 @@ const theme = extendTheme({
               color: theme.palette.primary.light,
             }
           },
-          color: theme.palette.primary.light,
+          // color: theme.palette.primary.light,
           textTransform: 'capitalize',
         }),
         endIcon: {
@@ -109,11 +109,11 @@ const theme = extendTheme({
             // #Trello : How to remove the border of the Material UI Select component?
             // https://stackoverflow.com/questions/69860132/how-to-remove-the-border-of-the-material-ui-select-component
             '& .MuiOutlinedInput-notchedOutline': {
-              border: '0'
+              // border: '0'
             },
             '&:hover': {
               '.MuiOutlinedInput-notchedOutline': {
-                borderColor: theme.palette.primary.light
+                // borderColor: theme.palette.primary.light
               },
             }
           };
@@ -130,7 +130,6 @@ const theme = extendTheme({
         }),
         input: ({ theme }) => ({
           outline: "none",
-          color: theme.palette.primary.light
         })
       }
     },
@@ -160,8 +159,7 @@ const theme = extendTheme({
         }),
 
       }
-    }
-
+    },
   },
 });
 

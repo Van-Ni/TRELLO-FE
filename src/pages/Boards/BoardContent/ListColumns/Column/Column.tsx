@@ -22,6 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { CSS } from '@dnd-kit/utilities';
 import { Sortable } from '~/interface/Sensors';
 import { toast } from 'react-toastify';
+import { useConfirm } from 'material-ui-confirm';
 
 const flexCenter = {
     display: 'flex',
@@ -59,7 +60,7 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [openNewCardForm, setOpenNewCardForm] = useState<boolean>(false);
     const [newCardTitle, setNewCardTitle] = useState<string>("");
-
+    const confirmDeleteColumn = useConfirm();
 
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,6 +79,22 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
         toggleOpenNewCardForm();
         setNewCardTitle("");
     }
+
+
+    const handleDeleteColumn = () => {
+        confirmDeleteColumn({
+            //Locally
+            title: "Delete Column?",
+            content: "Type 'Delete column' to delete it permanently. Are you sure?",
+            confirmationKeyword: 'Delete column',
+        })
+            .then(() => {
+                /* ... */
+            })
+            .catch(() => {
+                /* ... */
+            });
+    };
     return (
         // #dndkit : lỗi chiều cao -> không thể kéo từ trái sang
         // fix: wrap div
@@ -131,13 +148,23 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
                             anchorEl={anchorEl}
                             open={open}
                             onClose={handleClose}
+                            onClick={handleClose}
                             MenuListProps={{
                                 'aria-labelledby': 'basic-button-card',
                             }}
                         >
-                            <MenuItem>
+                            <MenuItem
+                                sx={{
+                                    "&:hover": {
+                                        color: "#48a948",
+                                        "& .add-card-icon": {
+                                            color: "#48a948",
+                                        }
+                                    }
+                                }}
+                                onClick={toggleOpenNewCardForm}>
                                 <ListItemIcon>
-                                    <AddCardIcon fontSize="small" />
+                                    <AddCardIcon className='add-card-icon' fontSize="small" />
                                 </ListItemIcon>
                                 <ListItemText>Add new card</ListItemText>
                             </MenuItem>
@@ -160,9 +187,18 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
                                 <ListItemText>Paste</ListItemText>
                             </MenuItem>
                             <Divider />
-                            <MenuItem>
+                            <MenuItem
+                                sx={{
+                                    "&:hover": {
+                                        color: "warning.dark",
+                                        "& .delete-forever-icon": {
+                                            color: "warning.dark",
+                                        }
+                                    }
+                                }}
+                                onClick={handleDeleteColumn}>
                                 <ListItemIcon>
-                                    <DeleteOutlineIcon fontSize="small" />
+                                    <DeleteOutlineIcon className='delete-forever-icon' fontSize="small" />
                                 </ListItemIcon>
                                 <ListItemText>Remove this list</ListItemText>
                             </MenuItem>
@@ -186,7 +222,12 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
                         color: 'primary.light',
                         maxHeight: CARD_FOOTER_HEIGHT
                     }}>
-                        <Button onClick={toggleOpenNewCardForm} variant="text" startIcon={<AddIcon />}>Add a card</Button>
+                        <Button
+                            sx={{ color: "primary.light" }}
+                            onClick={toggleOpenNewCardForm}
+                            variant="text" startIcon={<AddIcon />}>
+                            Add a card
+                        </Button>
                         <Tooltip title="Move card">
                             <Button sx={{
                                 color: 'primary.light',
