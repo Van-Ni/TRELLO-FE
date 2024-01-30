@@ -11,9 +11,14 @@ interface ListColumnsProps {
     columns: BoardColumn[],
     createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
     createNewCard: (cardData: CardDataRequest) => Promise<void>;
-
+    deleteColumnDetails: (columnId: string) => void;
 }
-const ListColumns: FC<ListColumnsProps> = ({ columns, createNewColumn, createNewCard }) => {
+const ListColumns: FC<ListColumnsProps> = ({
+    columns,
+    createNewColumn,
+    createNewCard,
+    deleteColumnDetails
+}) => {
     const [openNewColumnForm, setOpenNewColumnForm] = useState<boolean>(false);
     const [newColumnTitle, setNewColumnTitle] = useState<string>("");
 
@@ -51,7 +56,11 @@ const ListColumns: FC<ListColumnsProps> = ({ columns, createNewColumn, createNew
                     },
                 }}>
                 {/* Box card */}
-                {columns.map((column) => <Column key={column._id} column={column} createNewCard={createNewCard} />)}
+                {columns.map((column) => <Column key={column._id} 
+                column={column} 
+                createNewCard={createNewCard}
+                deleteColumnDetails={deleteColumnDetails}
+                 />)}
 
                 {/* Box add new column */}
                 {!openNewColumnForm ? (

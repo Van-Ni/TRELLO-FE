@@ -33,9 +33,13 @@ const flexCenter = {
 interface ColumnProps {
     column: Column,
     createNewCard?: (cardData: CardDataRequest) => Promise<void>;
-
+    deleteColumnDetails?: (columnId: string) => void;
 }
-const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
+const Column: FC<ColumnProps> = ({
+    column,
+    createNewCard,
+    deleteColumnDetails
+}) => {
     // #dndkit: useSortable
     // https://docs.dndkit.com/presets/sortable/usesortable#usage
     const sortable: Sortable = useSortable({
@@ -85,11 +89,12 @@ const Column: FC<ColumnProps> = ({ column, createNewCard }) => {
         confirmDeleteColumn({
             //Locally
             title: "Delete Column?",
-            content: "Type 'Delete column' to delete it permanently. Are you sure?",
-            confirmationKeyword: 'Delete column',
+            content: `Type 'Delete ${column.title} column' to delete it permanently. Are you sure?`,
+            confirmationKeyword: `Delete ${column.title} column`,
         })
             .then(() => {
                 /* ... */
+                deleteColumnDetails?.(column._id);
             })
             .catch(() => {
                 /* ... */

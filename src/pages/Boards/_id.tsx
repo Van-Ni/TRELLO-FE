@@ -4,10 +4,11 @@ import BoardBar from './BoardBar/BoardBar';
 import BoardContent from './BoardContent/BoardContent';
 import { mockData } from '~/api/mock-data';
 import { useEffect, useState } from 'react';
-import { createNewCardAPI, createNewColumnAPI, fetchBoardDetailsAPI, moveCardToAnotherColumnAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/api';
+import { createNewCardAPI, createNewColumnAPI, deleteColumnDetailsAPI, fetchBoardDetailsAPI, moveCardToAnotherColumnAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/api';
 import { Card, CardDataRequest, Column, ColumnDataRequest, Board as IBoard } from '~/interface/Board';
 import { generateCardPlaceholder } from '~/utils/formatters';
 import { isEmpty } from 'lodash';
+import { toast } from 'react-toastify';
 
 export const Board = () => {
 
@@ -74,6 +75,21 @@ export const Board = () => {
     // #trello: If you just need to call without receiving any data -> no need for async
     // update column order ids of board
     updateBoardDetailsAPI(board?._id as string, { columnOrderIds: columnIds });
+  }
+
+  // Delete column
+  const deleteColumnDetails = (columnId: string) => {
+    setBoardDetails((prevBoard) => {
+      const updatedColumns = prevBoard!.columns.filter((column: Column) => column._id !== columnId);
+      return {
+        ...prevBoard!,
+        columns: updatedColumns,
+      };
+    });
+    deleteColumnDetailsAPI(columnId).then(res => {
+      const {deleteResult} = res.data;
+      toast.success(deleteResult)
+    });
   }
 
   // Card
@@ -172,6 +188,7 @@ export const Board = () => {
         createNewColumn={createNewColumn}
         createNewCard={createNewCard}
         moveColumns={moveColumns}
+        deleteColumnDetails={deleteColumnDetails}
         moveCardInTheSameColumn={moveCardInTheSameColumn}
         moveCardToAnotherColumn={moveCardToAnotherColumn}
       />

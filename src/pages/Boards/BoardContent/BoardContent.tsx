@@ -23,6 +23,7 @@ interface BoardContentProps {
   createNewColumn: (columnData: ColumnDataRequest) => Promise<void>;
   createNewCard: (cardData: CardDataRequest) => Promise<void>;
   moveColumns: (columnData: IColumn[]) => void;
+  deleteColumnDetails: (columnId: string) => void;
   moveCardInTheSameColumn: (cardData: ICard[], cardOrderIds: string[], columnId: string) => void;
   moveCardToAnotherColumn: (currentCardId: string, prevColumnId: string, nextColumnId: string, dndOrderedColumns: Column[]) => void;
 }
@@ -33,8 +34,10 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 const BoardContent: FC<BoardContentProps> = ({
   columns, columnOrderIds,
-  createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn,
-  moveCardToAnotherColumn
+  createNewColumn, createNewCard, 
+  moveColumns, moveCardInTheSameColumn,
+  moveCardToAnotherColumn,
+  deleteColumnDetails
 }) => {
   // columns is ordered by order ids
   const [orderedColumns, setOrderedColumns] = useState<IColumn[]>([]);
@@ -330,7 +333,11 @@ const BoardContent: FC<BoardContentProps> = ({
       collisionDetection={closestCorners}
     // collisionDetection={collisionDetectionStrategy}
     >
-      <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} />
+      <ListColumns columns={orderedColumns} 
+      createNewColumn={createNewColumn} 
+      createNewCard={createNewCard}
+      deleteColumnDetails={deleteColumnDetails}
+       />
 
       {/* #dndkit: Drag Overlay */}
       <DragOverlay dropAnimation={dropAnimation}>

@@ -30,6 +30,12 @@ export const updateColumnDetailsAPI = async (columnId: string, updateData: Updat
     return board;
 };
 
+export const deleteColumnDetailsAPI = async (columnId: string): Promise<any | null> => {
+    const response = await axios.delete(`${API_ROOT}/v1/columns/${columnId}`);
+    console.log(response.data);
+    return response.data;
+};
+
 // Cards
 export const createNewCardAPI = async (cardData: any): Promise<any | null> => {
     const response = await axios.post(`${API_ROOT}/v1/cards`, cardData);
