@@ -10,7 +10,7 @@ if (process.env.BUILD_MODE === 'dev') {
     apiRoot = "http://localhost:4100";
 }
 
-if (process.env.BUILD_MODE === 'production') {
+if (import.meta.env.MODE === 'production') {
     apiRoot = "https://trello-be-zvnk.onrender.com";
 }
 
