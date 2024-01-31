@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build --base=./",
+    "dev": "cross-env BUILD_MODE=dev vite --host",
+    "build": "cross-env BUILD_MODE=production vite build --base=./",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -19,6 +19,7 @@
     "@mui/material": "5.13.0",
     "@types/lodash": "^4.14.202",
     "axios": "^1.6.5",
+    "cross-env": "7.0.3",
     "lodash": "^4.17.21",
     "material-ui-confirm": "3.0.9",
     "react": "^18.2.0",
@@ -27,6 +28,7 @@
     "vite-plugin-svgr": "3.2.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.13",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",

@@ -6,7 +6,10 @@ import svgr from "vite-plugin-svgr";
 //https://stackoverflow.com/questions/68241263/absolute-path-not-working-in-vite-project-react-ts
 //https://dev.to/willochs316/how-to-fix-absolute-path-not-working-in-vite-project-react-ts-3aj9
 export default defineConfig({
-  plugins: [react(),svgr()],
+  define: {
+    'process.env': process.env
+  },
+  plugins: [react(), svgr()],
   resolve: {
     alias: [
       { find: '~', replacement: '/src' },
@@ -15,5 +18,5 @@ export default defineConfig({
       { find: '@utils', replacement: '/src/utils' },
       { find: '@assets', replacement: '/src/assets' },
     ],
-   },
+  },
 })
